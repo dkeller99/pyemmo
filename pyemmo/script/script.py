@@ -962,10 +962,19 @@ class Script:
                 hString = hString[0 : len(hString) - 1] + "\n}"
                 matFun.add_params({f"Mat_h_{matName}": hString})
                 matFun.add_params({f"Mat_b_{matName}": bString})
-                matFun.add_params({f"Mat_b2_{matName}": f"Mat_b_{matName}()^2"})
-                matFun.add_params(
-                    {f"Mat_nu_{matName}": f"Mat_h_{matName}()/Mat_b_{matName}()"}
-                )
+                
+                # calculate BH curve depanding on iron fill factor
+                if isinstance(mat, ElectricalSteel):
+                    matFun.add_raw_code((f'DefineConstant[k_FE_{matName} = {{{mat.ironFillFactor}, Name StrCat[INPUT_MAT_PROPERTIES, "{matName} Iron Fill Factor"], Visible Flag_ExpertMode}}];\n'), newline=False)                  
+                    matFun.add_params({f"Mat_b_{matName}_fillFactor": f"k_FE_{matName} * Mat_b_{matName}() + mu0 * (1 - k_FE_{matName}) * Mat_h_{matName}()"})
+                    matFun.add_params({f"Mat_b2_{matName}": f"Mat_b_{matName}_fillFactor()^2"})
+                    matFun.add_params({f"Mat_nu_{matName}": f"Mat_h_{matName}()/Mat_b_{matName}_fillFactor()"})
+                else:
+                    matFun.add_params({f"Mat_b2_{matName}": f"Mat_b_{matName}()^2"})
+                    matFun.add_params(
+                        {f"Mat_nu_{matName}": f"Mat_h_{matName}()/Mat_b_{matName}()"}
+                    )
+                    
                 matFun.add_params({f"Mat_nu_{matName}(0)": f"Mat_nu_{matName}(1)"})
                 matFun.add_params(
                     {

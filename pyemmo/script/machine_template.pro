@@ -422,7 +422,7 @@ DefineConstant[
 
     // determine if we want to calculate using a linear or non-linear material
     Flag_NL = {
-        FLAG_NL, Name StrCat[INPUT_MAT_PROPERTIES, "Non-linear B-H curves"],
+        FLAG_NL, Name StrCat[INPUT_MAT_PROPERTIES, "0Non-linear B-H curves"],
         Choices{0, 1},
         Visible Flag_ExpertMode,
         Help StrCat("If this parameter is checked (=1), then the non-linear B-H curves ",

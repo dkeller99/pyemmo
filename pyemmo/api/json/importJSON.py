@@ -413,6 +413,9 @@ def create_material(mat_dict: dict[str, dict[Literal["wert"], Any]]) -> Material
             return ElectricalSteel.from_dict(mat_dict)
         logger.debug("Parameter sheetThickness is 0. Removing it from material dict!")
         mat_dict.pop("sheetThickness")
+        if "ironFillFactor" in mat_dict:
+            logger.debug("Removing parameter ironFillFactor from material dict!")
+            mat_dict.pop("ironFillFactor")
         if "lossParams" in mat_dict:
             logger.debug("Removing parameter lossParams from material dict!")
             mat_dict.pop("lossParams")

@@ -44,6 +44,7 @@ class ElectricalSteel(Material):
         self,
         name: str,
         sheetThickness: float,
+        ironFillFactor: float = 1.0,
         conductivity: float = 0.0,
         relPermeability: float = 1.0,
         BH: np.ndarray = np.empty(0),
@@ -60,6 +61,7 @@ class ElectricalSteel(Material):
         Parameters:
             name (str): Name of the material.
             sheetThickness (float): Thickness of the steel sheet in meters.
+            ironFillFactor (float, optional): Ratio of iron material to total volume (dimensionless).
             conductivity (float, optional): Electrical conductivity of the material in S/m.
             relPermeability (float, optional): Relative magnetic permeability (no unit).
             BH (numpy.ndarray, optional): B-H curve data as a NumPy array.
@@ -98,6 +100,7 @@ class ElectricalSteel(Material):
             thermalCapacity,
         )
         self.sheetThickness = sheetThickness
+        self.ironFillFactor = ironFillFactor
         self.referenceFrequency = referenceFrequency
         self.referenceFluxDensity = referenceFluxDensity
         # NOTE: lossParams needs to be set at last, because it uses reference
@@ -115,6 +118,7 @@ class ElectricalSteel(Material):
                 f"{key:>35}: {value:<15}"
                 for key, value in [
                     ("Sheet Thickness [mm]", self.sheetThickness),
+                    ("Iron Fill Factor []", self.ironFillFactor),
                     (
                         "Hysteresis Loss Factor [W/m³]",
                         self.lossParams[0],
@@ -192,6 +196,7 @@ class ElectricalSteel(Material):
         """Get dict representation of Material"""
         mat_dict = super().as_dict()
         mat_dict["sheetThickness"] = self.sheetThickness
+        mat_dict["ironFillFactor"] = self.ironFillFactor
         mat_dict["lossParams"] = self.lossParams
         mat_dict["referenceFrequency"] = self.referenceFrequency
         mat_dict["referenceFluxDensity"] = self.referenceFluxDensity
@@ -233,6 +238,40 @@ class ElectricalSteel(Material):
                     "Sheet thickness of material must be a numeric value but "
                     f"is '{type(newThickness)}':{newThickness}"
                 )
+            )
+            
+    @property
+    def ironFillFactor(self) -> float:
+        """The iron fill factor of the lamination material (dimensionless)
+
+        Returns:
+            float: iron fill factor (0 < value ≤ 1)
+        """
+        return self._ironFillFactor
+
+    @ironFillFactor.setter
+    def ironFillFactor(self, newFillFactor: float) -> None:
+        """Set the iron fill factor of the lamination material (dimensionless)
+
+        Args:
+            newFillFactor (float): iron fill factor (0 < value ≤ 1)
+
+        Raises:
+            TypeError: if given fill factor is not numeric or None
+            ValueError: if the given fill factor is not in the range (0, 1]
+        """
+        if isinstance(newFillFactor, (int, float)):
+            if 0 < newFillFactor <= 1:
+                self._ironFillFactor = newFillFactor
+            else:
+                raise ValueError(
+                    "Value for iron fill factor must be in the range (0, 1], "
+                    f"but is '{newFillFactor}'"
+                )
+        else:
+            raise TypeError(
+                "Iron fill factor must be a numeric value but "
+                f"is '{type(newFillFactor)}': {newFillFactor}"
             )
 
     @property
